@@ -3,6 +3,7 @@ package edu.ntnu.idi.idatt2003.models;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -12,12 +13,14 @@ public class DeckOfCards {
 
     private final char[] suit = {'S', 'H', 'D', 'C'};
     private final List<PlayingCard> cards;
+    private final Random random;
 
     /**
      * Creates a complete deck of cards (52 cards).
      */
     public DeckOfCards() {
         this.cards = new ArrayList<>();
+        this.random = new Random();
 
         for (char cardSuit : suit) {
             for (int face = 1; face <= 13; face++) {
@@ -33,6 +36,23 @@ public class DeckOfCards {
      */
     public List<PlayingCard> getCards() {
         return Collections.unmodifiableList(cards);
+    }
+
+    /**
+     * Deals a hand with n random cards from the deck.
+     *
+     * @param n number of cards to deal, from 1 to 52
+     * @return a collection containing n random cards
+     * @throws IllegalArgumentException if n is outside [1, 52]
+     */
+    public List<PlayingCard> dealHand(int n) {
+        if (n < 1 || n > cards.size()) {
+            throw new IllegalArgumentException("Parameter n must be a number between 1 and 52");
+        }
+
+        List<PlayingCard> shuffledCards = new ArrayList<>(cards);
+        Collections.shuffle(shuffledCards, random);
+        return new ArrayList<>(shuffledCards.subList(0, n));
     }
 
     /**
