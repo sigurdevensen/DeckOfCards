@@ -4,6 +4,7 @@ import edu.ntnu.idi.idatt2003.models.DeckOfCards;
 import edu.ntnu.idi.idatt2003.models.PlayingCard;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -11,7 +12,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -29,7 +29,6 @@ public class CardGameApp extends Application {
     private List<PlayingCard> currentHand = new ArrayList<>();
 
     private TextArea handArea;
-    private Spinner<Integer> handSizeSpinner;
     private TextField sumOfFacesField;
     private TextField heartsField;
     private TextField flushField;
@@ -42,9 +41,6 @@ public class CardGameApp extends Application {
         handArea.setWrapText(true);
         handArea.setPrefRowCount(10);
 
-        handSizeSpinner = new Spinner<>(1, 52, 5);
-        handSizeSpinner.setEditable(true);
-
         Button dealHandButton = new Button("Deal hand");
         dealHandButton.setMaxWidth(Double.MAX_VALUE);
         dealHandButton.setOnAction(event -> dealHand());
@@ -53,12 +49,7 @@ public class CardGameApp extends Application {
         checkHandButton.setMaxWidth(Double.MAX_VALUE);
         checkHandButton.setOnAction(event -> checkHand());
 
-        VBox controls = new VBox(12,
-            new Label("Antall kort:"),
-            handSizeSpinner,
-            dealHandButton,
-            checkHandButton
-        );
+        VBox controls = new VBox(12, dealHandButton, checkHandButton);
         controls.setAlignment(Pos.TOP_CENTER);
         controls.setPadding(new Insets(4, 0, 0, 0));
 
@@ -94,8 +85,7 @@ public class CardGameApp extends Application {
     }
 
     private void dealHand() {
-        int handSize = handSizeSpinner.getValue();
-        currentHand = deck.dealHand(handSize);
+        currentHand = deck.dealHand(5);
         handArea.setText(toHandString(currentHand));
         clearAnalysisFields();
     }
@@ -112,12 +102,14 @@ public class CardGameApp extends Application {
             .filter(card -> card.getSuit() == 'H')
             .map(PlayingCard::getAsString)
             .collect(Collectors.toList());
-        boolean hasFlush = currentHand.stream().map(PlayingCard::getSuit).distinct().count() == 1;
+        Map<Character, Long> suitCounts = currentHand.stream()
+            .collect(Collectors.groupingBy(PlayingCard::getSuit, Collectors.counting()));
+        boolean hasFlush = suitCounts.values().stream().anyMatch(count -> count >= 5);
         boolean hasQueenOfSpades = currentHand.stream()
             .anyMatch(card -> card.getSuit() == 'S' && card.getFace() == 12);
 
         sumOfFacesField.setText(String.valueOf(sum));
-        heartsField.setText(hearts.isEmpty() ? "None" : String.join(" ", hearts));
+        heartsField.setText(hearts.isEmpty() ? "No Hearts" : String.join(" ", hearts));
         flushField.setText(hasFlush ? "Yes" : "No");
         queenOfSpadesField.setText(hasQueenOfSpades ? "Yes" : "No");
     }
