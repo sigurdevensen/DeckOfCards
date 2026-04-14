@@ -77,12 +77,4 @@ public class PlayingCard {
         PlayingCard otherCard = (PlayingCard) o;
         return getSuit() == otherCard.getSuit() && getFace() == otherCard.getFace();
     }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 31 * hash + getSuit();
-        hash = 31 * hash + getFace();
-        return hash;
-    }
 }
